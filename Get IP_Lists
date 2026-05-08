@@ -9,8 +9,8 @@ headers = {
 }
 
 
-AUTH = HTTPBasicAuth("api_1XXXXXXXX", "6YYYYYYY")
-url = "https://uk-scp53.illum.io:443/api/v2/orgs/<ORG-ID>/sec_policy/active/ip_lists"
+AUTH = HTTPBasicAuth("api_XXXXXXXXX", "YYYYYYYY")
+url = "https://uk-scpYY.illum.io:443/api/v2/orgs/<ORG-ID>/sec_policy/active/ip_lists"
 response = requests.get(url, auth=AUTH, verify=False, headers=headers)
 #print(response.text)
 print(response.status_code)
