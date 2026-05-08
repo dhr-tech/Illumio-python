@@ -1,0 +1,19 @@
+# code for illumio automation to GET workloads from the PCE
+import json
+import os
+import requests
+from requests.auth import HTTPBasicAuth
+
+headers = {
+    "Accept": "application/json",
+    "Content-Type": "application/json"
+}
+
+
+AUTH = HTTPBasicAuth("api_xxxxxx", "yyyyyyy")
+url = "https://uk-YYY.illum.io:443/api/v2/orgs/3735772/workloads"
+response = requests.get(url, auth=AUTH, verify=False, headers=headers)
+#print(response.text)
+print(response.status_code)
+pretty_response = json.dumps(response.json(), indent=4)
+print(pretty_response)
