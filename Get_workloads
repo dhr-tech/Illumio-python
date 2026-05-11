@@ -11,7 +11,7 @@ headers = {
 
 
 AUTH = HTTPBasicAuth("api_xxxxxx", "yyyyyyy")
-url = "https://uk-YYY.illum.io:443/api/v2/orgs/3735772/workloads"
+url = "https://uk-YYY.illum.io:443/api/v2/orgs/YYYY/workloads"
 response = requests.get(url, auth=AUTH, verify=False, headers=headers)
 #print(response.text)
 print(response.status_code)
