@@ -12,7 +12,13 @@ API and Organisation ID can be fetched from PCE as shown below.
 
 # Limitations
 
-By default illumio could only fetch 500 entries. To overcome the challange you would need to run the program with header - async.
+Illumio limits synchronous responses to 500 entries. If the dataset is larger, the PCE:
+
+Does not return the data immediately
+1.  Starts a background job
+2.  Tells you where to check later
+
+This is called an asynchronous response.
 https://product-docs-repo.illumio.com/Tech-Docs/Core/25.4/REST-APIs/out/en/rest-apis-25-4/asynchronous-get-collections/async-job-operations.html
 
 <img width="316" height="206" alt="image" src="https://github.com/user-attachments/assets/5d1f5698-936b-4911-89ba-f6ca485dab40" />
