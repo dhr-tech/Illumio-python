@@ -1,0 +1,62 @@
+import json
+import requests
+from requests.auth import HTTPBasicAuth
+import urllib3
+
+# Disable SSL warnings (verify=False)
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+
+# =========================
+# Configuration
+# =========================
+HEADERS = {
+    "Accept": "application/json",
+    "Content-Type": "application/json"
+}
+
+AUTH = HTTPBasicAuth(
+    "api_xx",
+    "6yy"
+)
+
+BASE_URL = "https://uk-xxx.illum.io:443/api/v2"
+OUTPUT_FILE = "pcheck_output.txt"
+
+# =========================
+# Helper Function
+# =========================
+def get_api_data(endpoint):
+    url = f"{BASE_URL}{endpoint}"
+    response = requests.get(
+        url,
+        auth=AUTH,
+        headers=HEADERS,
+        verify=False
+    )
+
+    print(f"Calling: {url}")
+    print(f"Status Code: {response.status_code}")
+
+    response.raise_for_status()
+    return response.json()
+
+# =========================
+# Main Execution
+# =========================
+if __name__ == "__main__":
+
+    output_data = {}
+
+    # 1. PCE Health
+    output_data["pce_health"] = get_api_data("/health")
+
+    # 2. IP Lists
+    output_data["ip_lists"] = get_api_data(
+        "/orgs/3735772/sec_policy/active/ip_lists"
+    )
+
+    # Write both outputs into a single file
+    with open(OUTPUT_FILE, "w") as f:
+        json.dump(output_data, f, indent=4)
+
+    print(f"\n✅ Combined output written to {OUTPUT_FILE}")
