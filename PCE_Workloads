@@ -1,0 +1,80 @@
+import json
+import requests
+from requests.auth import HTTPBasicAuth
+import urllib3
+
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+
+ORG_ID = "3735772"
+BASE_URL = f"https://uk-XXX.illum.io/api/v2/orgs/{ORG_ID}"
+TARGET_APP = "<APP Name>"
+PAGE_SIZE = 500
+OUTPUT_FILE = "pcheck_output.txt"
+
+AUTH = HTTPBasicAuth(
+    "api_XXX",
+    "YYYYY"
+)
+
+HEADERS = {
+    "Accept": "application/json"
+}
+
+matched = []
+offset = 0
+total_count = None
+page = 1
+
+while True:
+    resp = requests.get(
+        f"{BASE_URL}/workloads",
+        auth=AUTH,
+        headers=HEADERS,
+        params={
+            "max_results": PAGE_SIZE,
+            "offset": offset,
+            "representation": "minimal"
+        },
+        verify=False,
+        timeout=60
+    )
+    resp.raise_for_status()
+
+    workloads = resp.json()
+
+    # ✅ Read total count ONCE
+    if total_count is None:
+        total_count = int(resp.headers.get("X-Total-Count", 0))
+        print(f"Total workloads reported by PCE: {total_count}")
+
+    # ✅ Filter this page
+    matches = [
+        wl for wl in workloads
+        if any(
+            lbl.get("key") == "app" and lbl.get("value") == TARGET_APP
+            for lbl in wl.get("labels", [])
+        )
+    ]
+
+    matched.extend(matches)
+
+    print(
+        f"Page {page:>4} | "
+        f"Fetched: {len(workloads):>4} | "
+        f"Matched: {len(matches):>3} | "
+        f"Total matched: {len(matched):>6}"
+    )
+
+    offset += PAGE_SIZE
+    page += 1
+
+    # ✅ REAL and REQUIRED stop condition
+    if offset >= total_count:
+        break
+
+print(f"\n✅ FINAL matched workloads (App={TARGET_APP}): {len(matched)}")
+
+with open(OUTPUT_FILE, "w") as f:
+    json.dump(matched, f, indent=4)
+
+print(f"✅ Output written to {OUTPUT_FILE}")
