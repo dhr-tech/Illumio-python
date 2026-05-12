@@ -10,9 +10,9 @@ urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 # =========================
 ORG_ID = "xxxx"
 BASE_URL = f"https://uk-xx.illum.io/api/v2/orgs/{ORG_ID}"
-TARGET_APP = "ATM"
+TARGET_APP = "<APP_Name>"
 PAGE_SIZE = 500
-OUTPUT_FILE = "atm_workloads.json"
+OUTPUT_FILE = "<APP_Name>_workloads.json"
 
 AUTH = HTTPBasicAuth(
     "api_xx",
