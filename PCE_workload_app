@@ -5,45 +5,107 @@ import urllib3
 
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
-ORG_ID = "PPPP"
-BASE_URL = f"https://uk-scp53.illum.io/api/v2/orgs/{ORG_ID}"
-TARGET_APP = "MSO"
+# =========================
+# Configuration
+# =========================
+ORG_ID = "xxxx"
+BASE_URL = f"https://uk-xx.illum.io/api/v2/orgs/{ORG_ID}"
+TARGET_APP = "ATM"
+PAGE_SIZE = 500
+OUTPUT_FILE = "atm_workloads.json"
 
 AUTH = HTTPBasicAuth(
-    "api_1670c2de4c591c5b1",
-    "6ea0f9e2dc858a1cc2ece7f7df259664e4c79c09f7dd2ce7e83ca77f635226cf"
+    "api_xx",
+    "xxxx"
 )
 
 HEADERS = {
-    "Accept": "application/json",
-    "Content-Type": "application/json"
+    "Accept": "application/json"
 }
 
-# --- GET ALL WORKLOADS ---
-response = requests.get(
-    f"{BASE_URL}/workloads",
-    auth=AUTH,
-    headers=HEADERS,
-    verify=False
-)
-response.raise_for_status()
+# =========================
+# Helper: robust app matcher
+# =========================
+def is_target_app(workload, target_app):
+    """
+    Returns True if workload has app label == target_app
+    Safe for unmanaged, static, and legacy workloads
+    """
+    for label in workload.get("labels", []):
+        if (
+            label.get("key", "").lower() == "app"
+            and label.get("value", "").upper() == target_app.upper()
+        ):
+            return True
+    return False
 
-workloads = response.json()
+# =========================
+# Paginated workload scan
+# =========================
+matched_workloads = []
+offset = 0
+total_count = None
+page = 1
 
-# --- FILTER BY APP LABEL VALUE ---
-filtered = [
-    wl for wl in workloads
-    if any(
-        label.get("key") == "app" and label.get("value") == TARGET_APP
-        for label in wl.get("labels", [])
+while True:
+    response = requests.get(
+        f"{BASE_URL}/workloads",
+        auth=AUTH,
+        headers=HEADERS,
+        params={
+            "max_results": PAGE_SIZE,
+            "offset": offset,
+            "include_deleted": "true",
+            "include_unmanaged": "true",
+            "include_ignored": "true"
+        },
+        verify=False,
+        timeout=90
     )
-]
+    response.raise_for_status()
 
-print(f"Total workloads: {len(workloads)}")
-print(f"Filtered workloads (App={TARGET_APP}): {len(filtered)}")
+    workloads = response.json()
 
-pretty = json.dumps(filtered, indent=4)
-print(pretty)
+    # Read authoritative count once
+    if total_count is None:
+        total_count = int(response.headers.get("X-Total-Count", 0))
+        print(f"Total workloads reported by PCE: {total_count}")
 
-with open("pcheck_output.txt", "w") as f:
-    f.write(pretty)
+    # Filter workloads for App = ATM
+    matches = []
+    for wl in workloads:
+        if is_target_app(wl, TARGET_APP):
+            matches.append({
+                "id": wl["href"].split("/")[-1],
+                "hostname": wl.get("hostname"),
+                "name": wl.get("name"),
+                "managed": wl.get("managed"),
+                "labels": wl.get("labels"),
+                "href": wl.get("href")
+            })
+
+    matched_workloads.extend(matches)
+
+    print(
+        f"Page {page:>4} | "
+        f"Fetched: {len(workloads):>4} | "
+        f"Matched: {len(matches):>3} | "
+        f"Total matched: {len(matched_workloads):>6}"
+    )
+
+    offset += PAGE_SIZE
+    page += 1
+
+    # ✅ Hard stop — prevents runaway pagination
+    if offset >= total_count:
+        break
+
+# =========================
+# Output
+# =========================
+print(f"\n✅ FINAL App={TARGET_APP} workloads: {len(matched_workloads)}")
+
+with open(OUTPUT_FILE, "w") as f:
+    json.dump(matched_workloads, f, indent=2)
+
+print(f"✅ Results written to {OUTPUT_FILE}")
