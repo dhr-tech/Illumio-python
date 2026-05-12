@@ -5,7 +5,7 @@ import urllib3
 
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
-ORG_ID = "3735772"
+ORG_ID = "PPPP"
 BASE_URL = f"https://uk-scp53.illum.io/api/v2/orgs/{ORG_ID}"
 TARGET_APP = "MSO"
 
