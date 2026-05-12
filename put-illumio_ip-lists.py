@@ -8,13 +8,13 @@ urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 # =========================
 # Configuration
 # =========================
-ORG_ID = "XX"
-IP_LIST_ID = "16044073672512345"      # <-- CHANGE THIS
+ORG_ID = "vvvv"
+IP_LIST_ID = "vvvv"
 BASE_URL = f"https://uk-scp53.illum.io/api/v2/orgs/{ORG_ID}"
 
 AUTH = HTTPBasicAuth(
-    "api_XX",
-    "YYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY"
+    "api_xxxxxx",
+    "yyyyyyyyyyyyyyyyyyyyyyyyy"
 )
 
 HEADERS = {
@@ -23,21 +23,26 @@ HEADERS = {
 }
 
 # =========================
-# Updated IP list payload
+# PUT payload (FULL list)
 # =========================
 payload = {
-    "name": "My_IP_List",                       # REQUIRED
-    "description": "Updated via automation",    # Optional
+    "name": "IPL-AZUREIP",   # ✅ REQUIRED
+    "description": (
+        "https://learn.microsoft.com/en-us/azure/virtual-network/"
+        "what-is-ip-address-168-63-129-16?tabs=windows"
+    ),
     "ip_ranges": [
         {
-            "from_ip": "10.10.10.0",
-            "to_ip": "10.10.10.255",
-            "description": "Internal subnet"
-        },
-        {
-            "cidr_block": "192.168.50.0/24",
-            "description": "Branch network"
+            "from_ip": "y.y.y.y",
+            "to_ip": "x.x.x.x",
+            "description": "Azure platform internal IP"
         }
+
+        # ✅ Add more entries here if needed
+        # {
+        #     "cidr_block": "20.190.128.0/18",
+        #     "description": "Azure public endpoints"
+        # }
     ]
 }
 
@@ -56,5 +61,5 @@ response = requests.put(
 
 response.raise_for_status()
 
-print("✅ IP list updated successfully")
+print("✅ IP list updated successfully:")
 print(json.dumps(response.json(), indent=2))
