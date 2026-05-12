@@ -8,13 +8,13 @@ urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 # =========================
 # Configuration
 # =========================
-ORG_ID = "3735772"
+ORG_ID = "XX"
 IP_LIST_ID = "16044073672512345"      # <-- CHANGE THIS
 BASE_URL = f"https://uk-scp53.illum.io/api/v2/orgs/{ORG_ID}"
 
 AUTH = HTTPBasicAuth(
-    "api_1670c2de4c591c5b1",
-    "6ea0f9e2dc858a1cc2ece7f7df259664e4c79c09f7dd2ce7e83ca77f635226cf"
+    "api_XX",
+    "YYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY"
 )
 
 HEADERS = {
