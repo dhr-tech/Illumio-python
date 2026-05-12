@@ -1,0 +1,49 @@
+import json
+import requests
+from requests.auth import HTTPBasicAuth
+import urllib3
+
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+
+ORG_ID = "3735772"
+BASE_URL = f"https://uk-scp53.illum.io/api/v2/orgs/{ORG_ID}"
+TARGET_APP = "<APP Name>"
+
+AUTH = HTTPBasicAuth(
+    "api_XXXX",
+    "YYYY"
+)
+
+HEADERS = {
+    "Accept": "application/json",
+    "Content-Type": "application/json"
+}
+
+# --- GET ALL WORKLOADS ---
+response = requests.get(
+    f"{BASE_URL}/workloads",
+    auth=AUTH,
+    headers=HEADERS,
+    verify=False
+)
+response.raise_for_status()
+
+workloads = response.json()
+
+# --- FILTER BY APP LABEL VALUE ---
+filtered = [
+    wl for wl in workloads
+    if any(
+        label.get("key") == "app" and label.get("value") == TARGET_APP
+        for label in wl.get("labels", [])
+    )
+]
+
+print(f"Total workloads: {len(workloads)}")
+print(f"Filtered workloads (App={TARGET_APP}): {len(filtered)}")
+
+pretty = json.dumps(filtered, indent=4)
+print(pretty)
+
+with open("pcheck_output.txt", "w") as f:
+    f.write(pretty)
